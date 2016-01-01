@@ -179,7 +179,7 @@ public class DevicesDBOpenHelper extends SQLiteOpenHelper {
     public Cursor listAllLocations(String mac) {
         SQLiteDatabase db = getReadableDatabase();
         return db.rawQuery(LIST_GEO_QUERY, new String[] {mac});
-    }
+    } 
 
 
 }
