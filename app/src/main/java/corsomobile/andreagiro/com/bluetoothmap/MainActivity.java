@@ -25,7 +25,8 @@ public class MainActivity extends AppCompatActivity {
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Toast.makeText(context, "Nuovi dati...", Toast.LENGTH_SHORT).show();
+            String nome = intent.getStringExtra("nome");
+            Toast.makeText(context, "Nuovi dati: " + nome, Toast.LENGTH_SHORT).show();
             refreshUi();
         }
     };

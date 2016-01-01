@@ -21,6 +21,8 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
+import java.util.Objects;
+
 
 public class LocalizationService extends Service implements GoogleApiClient.ConnectionCallbacks,
     GoogleApiClient.OnConnectionFailedListener, LocationListener {
@@ -184,6 +186,11 @@ public class LocalizationService extends Service implements GoogleApiClient.Conn
         String mac = device.getAddress();
         Long time = System.currentTimeMillis() / 1000;
 
+        //possono esserci device senza nome?
+        if (Objects.equals(nome, "") || nome == null) {
+            nome = "Device sconosciuto";
+        }
+
 
         // se non esiste creo una nuova entry nella tabella device
         if(!db.deviceExist(mac)) {
@@ -202,6 +209,7 @@ public class LocalizationService extends Service implements GoogleApiClient.Conn
 
         // broadcast event per l'aggiornamento delle interfacce
         Intent newLocIntent = new Intent(Statics.EVENT_ACTION_NEW_BLUETOOTH_DEVICE);
+        newLocIntent.putExtra("nome",nome );
         sendBroadcast(newLocIntent);
 
     }

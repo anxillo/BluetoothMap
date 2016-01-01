@@ -34,7 +34,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         @Override
         public void onReceive(Context context, Intent intent) {
             if(googleMap != null) {
-                Toast.makeText(context, "Nuovi dati...", Toast.LENGTH_SHORT).show();
+                String nome = intent.getStringExtra("nome");
+                Toast.makeText(context, "Nuovi dati: " + nome, Toast.LENGTH_SHORT).show();
                 refreshMarkers(googleMap);
             }
         }
