@@ -5,12 +5,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
-import java.util.Date;
 
-/**
- * Created by andrea on 30.12.15.
- */
+
 public class DevicesDBOpenHelper extends SQLiteOpenHelper {
 
     /**
@@ -87,6 +83,7 @@ public class DevicesDBOpenHelper extends SQLiteOpenHelper {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
+
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(DEVICES_TABLE_CREATE);
@@ -94,14 +91,15 @@ public class DevicesDBOpenHelper extends SQLiteOpenHelper {
 
     }
 
+
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        //TODO: inserire codice per upgrade database
+        // TODO: inserire codice per upgrade database
     }
 
     /**
      * deviceExist
-     * @param mac mac address o altri identificativo unico
+     * @param mac mac address o altro identificativo unico
      * @return true se gia nel database, false altrimenti
      */
     public boolean deviceExist (String mac) {
@@ -116,7 +114,8 @@ public class DevicesDBOpenHelper extends SQLiteOpenHelper {
         }
     }
 
-    public String  getMac (int ID) {
+
+    /*public String  getMac (int ID) {
         String ID_string = Integer.toString(ID);
         String mac = "";
         SQLiteDatabase db = getReadableDatabase();
@@ -125,7 +124,7 @@ public class DevicesDBOpenHelper extends SQLiteOpenHelper {
             mac = cursor.getString(cursor.getColumnIndex(DEVICES_MAC));
         }
         return mac;
-    }
+    } */
 
 
     /**
@@ -144,10 +143,10 @@ public class DevicesDBOpenHelper extends SQLiteOpenHelper {
 
     /**
      * insertEntry: inserisce una nuova entry nella tabella geo
-     * @param mac
-     * @param latitudine
-     * @param longitudine
-     * @param tempo
+     * @param mac mac address
+     * @param latitudine latitudine
+     * @param longitudine longitudine
+     * @param tempo timestamp
      */
     public void insertEntry (String mac, double latitudine, double longitudine, String toponym, long tempo ) {
         SQLiteDatabase db_w = getWritableDatabase();
@@ -161,19 +160,21 @@ public class DevicesDBOpenHelper extends SQLiteOpenHelper {
         db_w.close();
     }
 
+
     /**
      * Cursore per listare tutti i device
-     * @return
+     * @return il cursore
      */
     public Cursor listAllDevices () {
         SQLiteDatabase db = getReadableDatabase();
         return db.rawQuery(LIST_DEVICES_QUERY, null);
     }
 
+
     /**
      * Cursore per listare tutte le entry di un singolo device
-     * @param mac
-     * @return
+     * @param mac mac address
+     * @return il cursore
      */
     public Cursor listAllLocations(String mac) {
         SQLiteDatabase db = getReadableDatabase();

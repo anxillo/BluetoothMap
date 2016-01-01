@@ -14,8 +14,6 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.support.annotation.Nullable;
-import android.util.JsonReader;
-import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -23,23 +21,10 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 
-/**
- * Created by andrea on 31.12.15.
- */
 public class LocalizationService extends Service implements GoogleApiClient.ConnectionCallbacks,
     GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
-
-    /**
-     * Variariabili e costanti
-     */
     private static final int LOCALIZATION_SERVICE_SCAN_INTERVAL = 30000;
     private Handler handleJSON;
 
@@ -50,9 +35,6 @@ public class LocalizationService extends Service implements GoogleApiClient.Conn
     private BluetoothAdapter btAdapter  = BluetoothAdapter.getDefaultAdapter();
     private Location currentLocation;
     private String currentToponym;
-
-
-
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
@@ -96,7 +78,7 @@ public class LocalizationService extends Service implements GoogleApiClient.Conn
         /**
          * bluetooth
          */
-        // Register the BroadcastReceiver
+        // Registro il receiver
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         registerReceiver(mReceiver, filter);
 
@@ -107,13 +89,13 @@ public class LocalizationService extends Service implements GoogleApiClient.Conn
             @Override
             public void handleMessage(Message msg) {
                 Bundle b = msg.getData();
-                //currentToponym = b.getString("toponym", "Toponym not set");
-                currentToponym = "RUNNED";
+                currentToponym = b.getString("toponym", "Toponym not set");
             }
         };
 
         super.onCreate();
     }
+
 
     @Nullable
     @Override
@@ -126,17 +108,19 @@ public class LocalizationService extends Service implements GoogleApiClient.Conn
     public void onConnected(Bundle bundle) {
         Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         if (mLastLocation != null) {
-            updateLocation(mLastLocation);
+            currentLocation = mLastLocation;
         }
         startUpdates();
         startBtScan();
 
     }
 
+
     @Override
     public void onConnectionSuspended(int i) {
 
     }
+
 
     @Override
     public void onLocationChanged(Location location) {
@@ -144,18 +128,21 @@ public class LocalizationService extends Service implements GoogleApiClient.Conn
         startBtScan();
     }
 
+
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
 
     }
 
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if(mGoogleApiClient != null && mGoogleApiClient.isConnected() == false) {
+        if(mGoogleApiClient != null && !mGoogleApiClient.isConnected()) {
             mGoogleApiClient.connect();
         }
         return Service.START_STICKY;
     }
+
 
     @Override
     public void onDestroy() {
@@ -164,24 +151,34 @@ public class LocalizationService extends Service implements GoogleApiClient.Conn
         super.onDestroy();
     }
 
+    /**
+     * stopUpdates: interrompe la richiesta di location updates
+     */
     void stopUpdates() {
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
-
-
     }
 
+    /**
+     * startUpdates: fa partire la richiesta di location updates
+     */
     void startUpdates() {
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationrequest, this);
-        
     }
 
+
+    /**
+     * startBtScan: inizia la discovery bluetooth
+     */
     void startBtScan() {
         btAdapter.startDiscovery();
     }
 
 
-
-
+    /**
+     * saveDataToDb: formatta i dati per la scrittura su database e fa il broadcast
+     *               per l'aggiornamento delle UI
+     * @param device la device rilevata
+     */
     private void saveDataToDb(BluetoothDevice device) {
         String nome = device.getName();
         String mac = device.getAddress();
@@ -194,6 +191,9 @@ public class LocalizationService extends Service implements GoogleApiClient.Conn
         }
 
         // inserisco il dato nella tabella geo
+        if (currentToponym == null) {
+            currentToponym = "Località sconosciuta";
+        }
         if (currentLocation != null) {
             double latitude = currentLocation.getLatitude();
             double longitude = currentLocation.getLongitude();
@@ -206,11 +206,23 @@ public class LocalizationService extends Service implements GoogleApiClient.Conn
 
     }
 
+
+    /**
+     * updateLocation: aggiorna la location corrente e fa partire updateToponym
+     *                 al servizio JSON
+     * @param location la location
+     */
     private void updateLocation (Location location) {
         currentLocation = location;
         updateToponym(location.getLatitude(), location.getLongitude());
     }
 
+
+    /**
+     * updateToponym: richiede al servizio JSON il toponimo cottispondente
+     * @param latitude latitudine
+     * @param longitude longitudine
+     */
     private void updateToponym (double latitude, double longitude) {
         String code = "lat=" + latitude + "&lng=" + longitude;
         Intent intent = new Intent(this, JSONToponymService.class);

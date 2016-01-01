@@ -13,27 +13,25 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 
-/**
- * Created by andrea on 31.12.15.
- */
+
 public class JSONToponymService extends IntentService {
 
     private static final String TOPONYM_JSON_URL = "http://api.geonames.org/findNearbyJSON?username=supsi&";
 
-    public JSONToponymService(String name) {
-        super(name);
+    public JSONToponymService() {
+        super("JSONToponymService");
     }
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        Log.e("STARTED JSON INTENT__", "true");
+        Log.d("JSON", "started");
         Bundle b = intent.getExtras();
         String code = b.getString("code");
         Messenger messenger = (Messenger)b.get("handler");
         String myUrl = TOPONYM_JSON_URL + code;
+        Log.d("JSON url",myUrl );
         HttpURLConnection connection = null;
         InputStream is = null;
         String toponym = "";
@@ -52,10 +50,12 @@ public class JSONToponymService extends IntentService {
             is = connection.getInputStream();
 
             JsonReader reader = new JsonReader(new InputStreamReader(is, "UTF-8"));
+
             reader.beginObject();
             while (reader.hasNext()) {
                 String name = reader.nextName();
                 if (name.equals("geonames")) {
+                    reader.beginArray();
                     reader.beginObject();
                     while (reader.hasNext()) {
                         String objName = reader.nextName();
@@ -66,12 +66,15 @@ public class JSONToponymService extends IntentService {
                         }
                     }
                     reader.endObject();
+                    reader.endArray();
                     Message message = new Message();
                     Bundle bundle = new Bundle();
                     bundle.putString("toponym", toponym);
                     message.setData(bundle);
                     try {
-                        messenger.send(message);
+                        if (messenger != null) {
+                            messenger.send(message);
+                        }
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     }
@@ -80,8 +83,6 @@ public class JSONToponymService extends IntentService {
             }
             reader.endObject();
 
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -95,7 +96,6 @@ public class JSONToponymService extends IntentService {
                     e.printStackTrace();
                 }
             }
-
         }
     }
 }

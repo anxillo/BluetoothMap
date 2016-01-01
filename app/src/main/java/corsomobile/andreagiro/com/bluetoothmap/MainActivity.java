@@ -6,15 +6,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
-import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
@@ -29,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Toast.makeText(context, "New data found...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Nuovi dati...", Toast.LENGTH_SHORT).show();
             refreshUi();
         }
     };
@@ -39,17 +35,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        /**
-         * UI
-         */
-        listView = (ListView) findViewById(R.id.listView);
 
-
-
-        /**
-         * controllo e faccio partire il BT
-         */
-
+        // Controllo e start bluetooth
         if (!btAdapter.isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, ENABLE_BT);
@@ -57,24 +44,20 @@ public class MainActivity extends AppCompatActivity {
             startBluetoothScanService();
         }
 
-
-
-
-        /**
-         * ui
-         */
+        //UI
+        listView = (ListView) findViewById(R.id.listView);
         refreshUi();
 
     }
 
 
-
     public boolean onCreateOptionsMenu (Menu menu) {
-        MenuItem viewUserInfo = menu.add(Menu.NONE, 1, Menu.NONE, "Guarda info utente");
-
+        MenuItem viewUserInfo = menu.add(Menu.NONE, 1, Menu.NONE, "Informazioni utente");
+        viewUserInfo.setIcon(R.drawable.ic_timer_auto_24dp).setShowAsAction(1);
         return true;
 
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -90,8 +73,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == ENABLE_BT) {
@@ -102,11 +83,13 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+
     @Override
     protected void onResume() {
         registerReceiver(receiver, filter);
         super.onResume();
     }
+
 
     @Override
     protected void onPause() {
@@ -114,10 +97,12 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
     }
 
+
     void startBluetoothScanService  () {
         Intent intent = new Intent(this, LocalizationService.class);
         startService(intent);
     }
+
 
     void refreshUi () {
         devicesDBOpenHelper = new DevicesDBOpenHelper(this);

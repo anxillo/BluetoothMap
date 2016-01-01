@@ -70,8 +70,8 @@ public class UserDataActivity extends AppCompatActivity {
         });
 
         readUserData();
-
     }
+
 
     /**
      * readUserData:
@@ -90,6 +90,7 @@ public class UserDataActivity extends AppCompatActivity {
         et_email.setText(email);
         tw_UID.setText(UID);
     }
+
 
     /**
      * saveUserData:
@@ -117,7 +118,6 @@ public class UserDataActivity extends AppCompatActivity {
             return;
         }
 
-
         // Se UID non esiste, ne crea uno
         if (TextUtils.isEmpty(UID)) {
             long ts = System.currentTimeMillis() / 1000;
@@ -136,9 +136,5 @@ public class UserDataActivity extends AppCompatActivity {
 
         //esco
         finish();
-
     }
-
-
-
 }

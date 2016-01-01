@@ -14,6 +14,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -33,27 +34,26 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         @Override
         public void onReceive(Context context, Intent intent) {
             if(googleMap != null) {
-                Toast.makeText(context, "New data found...", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Nuovi dati...", Toast.LENGTH_SHORT).show();
                 refreshMarkers(googleMap);
             }
         }
     };
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
-
         mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
     }
+
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         this.googleMap = googleMap;
+
         //prendo il mac adress dall intent
          mac = getIntent().getStringExtra("mac");
          zoom = 15;
@@ -69,12 +69,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lastPos, zoom));
         }
 
-
         //leggo dal database e creo i marker
         refreshMarkers(googleMap);
-
     }
-
 
 
     @Override
@@ -86,20 +83,31 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         super.onResume();
     }
 
+
     @Override
     protected void onPause() {
         unregisterReceiver(receiver);
         super.onPause();
     }
 
+
+    /**
+     * GetDate: formatta il timestamp nel database in data leggibile
+     * @param time timestamp
+     * @return  data leggibile
+     */
     private String getDate(long time) {
         time = time * 1000;
         Calendar cal = Calendar.getInstance(Locale.ENGLISH);
         cal.setTimeInMillis(time);
-        String date = DateFormat.format("dd.MM.yyyy - HH:mm:ss", cal).toString();
-        return date;
+        return DateFormat.format("d MMM yyyy - HH:mm", cal).toString();
     }
 
+
+    /**
+     * refreshMarkers: fa un refresh dei markers
+     * @param googleMap la mappa
+     */
     private void refreshMarkers(GoogleMap googleMap) {
         googleMap.clear();
         db = new DevicesDBOpenHelper(this);
@@ -113,18 +121,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
                 googleMap.addMarker(new MarkerOptions()
                                 .position(new LatLng(latitude, longitude))
-                                .title(getDate(time))
-                                .snippet( toponym + " Coords: " +c.getPosition() + " di " + c.getCount() + " ("
-                                        + latitude + " - " + longitude + ")")
+                                .title(c.getPosition() + ": " + toponym)
+                                .snippet(getDate(time))
+                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
                 );
             }
-
-
-
-
         }
     }
-
-
-
 }
