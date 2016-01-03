@@ -105,8 +105,20 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:id="@+id/tw_UID"
+            android:layout_marginTop="12dp"
             android:layout_centerVertical="true"
             android:layout_centerHorizontal="true" />
+
+        <Switch
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Antispam"
+            android:id="@+id/switch_antispam"
+            android:checked="false"
+            android:layout_below="@+id/et_email"
+            android:layout_alignParentEnd="true"
+            android:textSize="20dp"
+            android:layout_alignStart="@+id/tw_UID" />
 
     </RelativeLayout>
 
